@@ -1,0 +1,670 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#6b2036">
+  <title>SJS DYNASTY | Admin Panel</title>
+
+  <style>
+    :root {
+      --cream: #fbf5ec;
+      --burgundy: #6b2036;
+      --gold: #b99758;
+      --ink: #30242a;
+      --muted: #776a6e;
+      --white: #fff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--cream);
+      color: var(--ink);
+      font-family: Arial, sans-serif;
+    }
+
+    header {
+      background: var(--burgundy);
+      color: white;
+      padding: 22px 16px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-family: Georgia, serif;
+      letter-spacing: 3px;
+    }
+
+    header p {
+      margin: 8px 0 0;
+      color: #f0dfc0;
+      font-size: 12px;
+    }
+
+    main {
+      width: min(100% - 24px, 850px);
+      margin: 24px auto;
+    }
+
+    .panel {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid #eadccc;
+      border-radius: 10px;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-family: Georgia, serif;
+      font-weight: normal;
+      color: var(--burgundy);
+    }
+
+    label {
+      display: block;
+      margin: 14px 0 6px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #d9cbbd;
+      border-radius: 6px;
+      background: white;
+      color: var(--ink);
+      font: inherit;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    button, .link-button {
+      display: inline-block;
+      border: 0;
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin: 10px 6px 0 0;
+      background: var(--burgundy);
+      color: white;
+      font-size: 13px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      background: #eee3d8;
+      color: var(--burgundy);
+    }
+
+    button.danger {
+      background: #9e2929;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .status {
+      margin: 12px 0;
+      font-size: 14px;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    .product {
+      display: grid;
+      grid-template-columns: 90px minmax(0, 1fr);
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid #eadccc;
+    }
+
+    .product img {
+      width: 90px;
+      height: 115px;
+      object-fit: cover;
+      border-radius: 5px;
+      background: var(--cream);
+    }
+
+    .product h3 {
+      margin: 0 0 7px;
+      overflow-wrap: anywhere;
+    }
+
+    .product p {
+      margin: 5px 0;
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+
+    .hidden { display: none !important; }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    @media (min-width: 600px) {
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0 16px;
+      }
+
+      .full-width { grid-column: 1 / -1; }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>SJS DYNASTY</h1>
+    <p>SECURE STORE MANAGEMENT</p>
+  </header>
+
+  <main>
+    <section class="panel" id="login-panel">
+      <h2>Admin Login</h2>
+      <p class="muted">
+        Sign in with the admin user you created in Supabase Authentication.
+      </p>
+
+      <form id="login-form">
+        <label for="email">Admin email</label>
+        <input id="email" type="email" autocomplete="username"
+          required>
+
+        <label for="password">Password</label>
+        <input id="password" type="password"
+          autocomplete="current-password" required>
+
+        <button id="login-button" type="submit">Sign In</button>
+      </form>
+
+      <p id="login-status" class="status" role="status"></p>
+    </section>
+
+    <section id="admin-panel" class="hidden">
+      <section class="panel">
+        <h2>Product Management</h2>
+        <p id="signed-in-user" class="muted"></p>
+        <button id="logout-button" class="secondary" type="button">
+          Sign Out
+        </button>
+        <a class="link-button" href="index.html">View Store</a>
+      </section>
+
+      <section class="panel">
+        <h2 id="form-title">Add New Product</h2>
+
+        <form id="product-form">
+          <input id="product-id" type="hidden">
+
+          <div class="form-grid">
+            <div class="full-width">
+              <label for="product-name">Product name *</label>
+              <input id="product-name" maxlength="180" required>
+            </div>
+
+            <div>
+              <label for="price">Selling price (BDT) *</label>
+              <input id="price" type="number" min="0"
+                step="0.01" required>
+            </div>
+
+            <div>
+              <label for="old-price">Regular price (optional)</label>
+              <input id="old-price" type="number" min="0"
+                step="0.01">
+            </div>
+
+            <div>
+              <label for="stock">Available stock *</label>
+              <input id="stock" type="number" min="0"
+                step="1" value="1" required>
+            </div>
+
+            <div>
+              <label for="category">Category *</label>
+              <select id="category" required>
+                <option value="Sarees">Sarees</option>
+                <option value="Three-piece sets">Three-piece sets</option>
+                <option value="Lehenga and party wear">
+                  Lehenga and party wear
+                </option>
+                <option value="Ladies' jackets">Ladies' jackets</option>
+                <option value="Bags and accessories">
+                  Bags and accessories
+                </option>
+              </select>
+            </div>
+
+            <div class="full-width">
+              <label for="description">Description</label>
+              <textarea id="description" maxlength="5000"></textarea>
+            </div>
+
+            <div class="full-width">
+              <label for="photo">Product photo</label>
+              <input id="photo" type="file"
+                accept="image/jpeg,image/png,image/webp">
+              <p class="muted">
+                Choose a JPG, PNG, or WebP image. Maximum size: 5 MB.
+                When editing, leave this empty to keep the current photo.
+              </p>
+              <p id="current-photo" class="muted"></p>
+            </div>
+          </div>
+
+          <button id="save-button" type="submit">Save Product</button>
+          <button id="cancel-edit" class="secondary hidden"
+            type="button">Cancel Edit</button>
+
+          <p id="form-status" class="status" role="status"></p>
+        </form>
+      </section>
+
+      <section class="panel">
+        <h2>Your Products</h2>
+        <button id="refresh-button" class="secondary" type="button">
+          Refresh Products
+        </button>
+        <p id="list-status" class="status" role="status"></p>
+        <div id="product-list"></div>
+      </section>
+    </section>
+  </main>
+
+  <footer>SJS DYNASTY · Store Administration</footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+
+  <script>
+    const $ = id => document.getElementById(id);
+
+    const loginPanel = $("login-panel");
+    const adminPanel = $("admin-panel");
+    const loginStatus = $("login-status");
+    const formStatus = $("form-status");
+    const listStatus = $("list-status");
+    const productList = $("product-list");
+
+    let currentUser = null;
+    let currentProducts = [];
+    let currentPhotoUrl = "";
+
+    function message(element, text) {
+      element.textContent = text;
+    }
+
+    function setBusy(button, busy, text) {
+      button.disabled = busy;
+      if (busy) {
+        button.dataset.oldText = button.textContent;
+        button.textContent = text;
+      } else if (button.dataset.oldText) {
+        button.textContent = button.dataset.oldText;
+        delete button.dataset.oldText;
+      }
+    }
+
+    function showAdmin(user) {
+      currentUser = user;
+      loginPanel.classList.add("hidden");
+      adminPanel.classList.remove("hidden");
+      $("signed-in-user").textContent = "Signed in: " + user.email;
+      loadProducts();
+    }
+
+    function showLogin() {
+      currentUser = null;
+      adminPanel.classList.add("hidden");
+      loginPanel.classList.remove("hidden");
+    }
+
+    $("login-form").addEventListener("submit", async event => {
+      event.preventDefault();
+      message(loginStatus, "");
+
+      const button = $("login-button");
+      setBusy(button, true, "Signing in...");
+
+      try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+          email: $("email").value.trim(),
+          password: $("password").value
+        });
+
+        if (error) throw error;
+
+        showAdmin(data.user);
+        $("password").value = "";
+        message(loginStatus, "");
+      } catch (error) {
+        message(loginStatus, "Sign-in failed: " + error.message);
+      } finally {
+        setBusy(button, false);
+      }
+    });
+
+    $("logout-button").addEventListener("click", async () => {
+      const { error } = await supabaseClient.auth.signOut();
+      if (error) {
+        message(listStatus, "Sign-out failed: " + error.message);
+        return;
+      }
+      showLogin();
+    });
+
+    $("product-form").addEventListener("submit", async event => {
+      event.preventDefault();
+      message(formStatus, "");
+
+      if (!currentUser) {
+        message(formStatus, "Please sign in again.");
+        return;
+      }
+
+      const button = $("save-button");
+      setBusy(button, true, "Saving...");
+
+      let uploadedPath = "";
+
+      try {
+        const name = $("product-name").value.trim();
+        const price = Number($("price").value);
+        const oldPriceValue = $("old-price").value;
+        const stock = Number($("stock").value);
+        const category = $("category").value;
+        const description = $("description").value.trim();
+        const file = $("photo").files[0];
+        const id = $("product-id").value;
+
+        if (!name || !Number.isFinite(price) || price < 0 ||
+            !Number.isInteger(stock) || stock < 0) {
+          throw new Error("Check the product name, price, and stock.");
+        }
+
+        if (oldPriceValue !== "" &&
+            (!Number.isFinite(Number(oldPriceValue)) ||
+             Number(oldPriceValue) < 0)) {
+          throw new Error("Regular price must be zero or greater.");
+        }
+
+        if (file) {
+          const allowedTypes = [
+            "image/jpeg", "image/png", "image/webp"
+          ];
+
+          if (!allowedTypes.includes(file.type)) {
+            throw new Error("Use a JPG, PNG, or WebP image.");
+          }
+
+          if (file.size > 5 * 1024 * 1024) {
+            throw new Error("Image must be 5 MB or smaller.");
+          }
+        }
+
+        let photoUrl = currentPhotoUrl;
+
+        if (file) {
+          const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+          const path = currentUser.id + "/" + Date.now() + "-" + safeName;
+
+          const { error: uploadError } = await supabaseClient.storage
+            .from("product-photos")
+            .upload(path, file, {
+              cacheControl: "3600",
+              upsert: false,
+              contentType: file.type
+            });
+
+          if (uploadError) throw uploadError;
+
+          uploadedPath = path;
+
+          const { data: publicData } = supabaseClient.storage
+            .from("product-photos")
+            .getPublicUrl(path);
+
+          photoUrl = publicData.publicUrl;
+        }
+
+        const product = {
+          name,
+          price,
+          old_price: oldPriceValue === ""
+            ? null : Number(oldPriceValue),
+          stock,
+          category,
+          description,
+          photo_url: photoUrl
+        };
+
+        let result;
+
+        if (id) {
+          result = await supabaseClient
+            .from("products")
+            .update(product)
+            .eq("id", Number(id))
+            .select()
+            .single();
+        } else {
+          result = await supabaseClient
+            .from("products")
+            .insert(product)
+            .select()
+            .single();
+        }
+
+        if (result.error) throw result.error;
+
+        message(formStatus, "Product saved successfully.");
+        resetForm();
+        await loadProducts();
+      } catch (error) {
+        // Remove a newly uploaded image if the database save failed.
+        if (uploadedPath) {
+          await supabaseClient.storage
+            .from("product-photos")
+            .remove([uploadedPath]);
+        }
+
+        message(formStatus, "Could not save product: " + error.message);
+      } finally {
+        setBusy(button, false);
+      }
+    });
+
+    function resetForm() {
+      $("product-form").reset();
+      $("product-id").value = "";
+      $("stock").value = "1";
+      $("form-title").textContent = "Add New Product";
+      $("save-button").textContent = "Save Product";
+      $("cancel-edit").classList.add("hidden");
+      $("current-photo").textContent = "";
+      currentPhotoUrl = "";
+    }
+
+    $("cancel-edit").addEventListener("click", () => {
+      resetForm();
+      message(formStatus, "");
+    });
+
+    function addText(parent, tag, text, className) {
+      const element = document.createElement(tag);
+      element.textContent = text;
+      if (className) element.className = className;
+      parent.appendChild(element);
+      return element;
+    }
+
+    function startEditing(product) {
+      $("product-id").value = product.id;
+      $("product-name").value = product.name || "";
+      $("price").value = product.price ?? "";
+      $("old-price").value = product.old_price ?? "";
+      $("stock").value = product.stock ?? 0;
+      $("category").value = product.category || "Sarees";
+      $("description").value = product.description || "";
+      $("photo").value = "";
+      currentPhotoUrl = product.photo_url || "";
+
+      $("current-photo").textContent = currentPhotoUrl
+        ? "Current photo is saved. Upload another only if you want to replace it."
+        : "No photo saved yet.";
+
+      $("form-title").textContent = "Edit Product";
+      $("save-button").textContent = "Update Product";
+      $("cancel-edit").classList.remove("hidden");
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    async function deleteProduct(product) {
+      if (!confirm('Delete "' + product.name + '" permanently?')) return;
+
+      message(listStatus, "Deleting product...");
+
+      try {
+        const { error } = await supabaseClient
+          .from("products")
+          .delete()
+          .eq("id", product.id);
+
+        if (error) throw error;
+
+        message(listStatus, "Product deleted.");
+        await loadProducts();
+      } catch (error) {
+        message(listStatus, "Delete failed: " + error.message);
+      }
+    }
+
+    function renderProducts(products) {
+      productList.replaceChildren();
+
+      if (!products.length) {
+        addText(productList, "p", "No products found.", "muted");
+        return;
+      }
+
+      products.forEach(product => {
+        const card = document.createElement("article");
+        card.className = "product";
+
+        if (product.photo_url) {
+          const img = document.createElement("img");
+          img.src = product.photo_url;
+          img.alt = product.name || "Product photo";
+          img.loading = "lazy";
+          img.onerror = () => img.remove();
+          card.appendChild(img);
+        } else {
+          const placeholder = document.createElement("div");
+          placeholder.className = "muted";
+          placeholder.textContent = "No photo";
+          card.appendChild(placeholder);
+        }
+
+        const details = document.createElement("div");
+        addText(details, "h3", product.name || "Unnamed product");
+        addText(details, "p", "Price: ৳" + product.price);
+        addText(details, "p", "Stock: " + product.stock);
+        addText(details, "p", "Category: " + product.category);
+        addText(details, "p", product.description || "", "muted");
+
+        const editButton = document.createElement("button");
+        editButton.type = "button";
+        editButton.className = "secondary";
+        editButton.textContent = "Edit";
+        editButton.addEventListener("click", () => startEditing(product));
+        details.appendChild(editButton);
+
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "danger";
+        deleteButton.textContent = "Delete";
+        deleteButton.addEventListener("click", () => deleteProduct(product));
+        details.appendChild(deleteButton);
+
+        card.appendChild(details);
+        productList.appendChild(card);
+      });
+    }
+
+    async function loadProducts() {
+      message(listStatus, "Loading products...");
+      productList.replaceChildren();
+
+      try {
+        const { data, error } = await supabaseClient
+          .from("products")
+          .select("id, name, price, old_price, description, photo_url, stock, category, created_at")
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        currentProducts = data || [];
+        renderProducts(currentProducts);
+        message(listStatus, currentProducts.length + " product(s) loaded.");
+      } catch (error) {
+        message(listStatus, "Could not load products: " + error.message);
+      }
+    }
+
+    $("refresh-button").addEventListener("click", loadProducts);
+
+    async function initialize() {
+      if (!window.supabase || typeof supabaseClient === "undefined") {
+        message(loginStatus,
+          "Connection failed. Check supabase.js and the Supabase CDN.");
+        return;
+      }
+
+      const { data, error } = await supabaseClient.auth.getSession();
+
+      if (error) {
+        message(loginStatus, "Could not check login: " + error.message);
+        return;
+      }
+
+      if (data.session) {
+        showAdmin(data.session.user);
+      }
+
+      supabaseClient.auth.onAuthStateChange((event, session) => {
+        if (event === "SIGNED_OUT" || !session) {
+          showLogin();
+        } else if (event === "SIGNED_IN") {
+          showAdmin(session.user);
+        }
+      });
+    }
+
+    initialize();
+  </script>
+</body>
+</html>
